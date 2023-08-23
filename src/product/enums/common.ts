@@ -1,9 +1,9 @@
 export enum Parameter {
   Title = 'title',
-  Price = 'Price',
+  Price = 'price',
 }
 
 export enum Order {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  ASC = 'asc',
+  DESC = 'desc',
 }
