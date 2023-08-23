@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './interfaces/product.interface';
+import { Order, Parameter } from './enums/common';
 
 @Controller('product')
 export class ProductController {
@@ -8,8 +9,8 @@ export class ProductController {
 
   @Get()
   async getAllProducts(
-    @Query('param') param: string,
-    @Query('order') order: string,
+    @Query('param') param: Parameter,
+    @Query('order') order: Order,
   ): Promise<Product[]> {
     return this.productService.getAll(param, order);
   }
