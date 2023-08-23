@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Param,
+  HttpCode,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CartItem } from './interfaces/cart-item.interface';
 
@@ -14,5 +22,11 @@ export class CartController {
   @Post()
   async addItem(@Body('productId') productId: string): Promise<CartItem[]> {
     return this.cartService.addItem(productId);
+  }
+
+  @Delete(':productId')
+  @HttpCode(204)
+  async removeItem(@Param('productId') productId: string): Promise<void> {
+    await this.cartService.removeItem(productId);
   }
 }

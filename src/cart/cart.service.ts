@@ -41,9 +41,23 @@ export class CartService {
       option2: selectedProduct.variants[0].option2,
     });
 
-    const updatedCartData = JSON.stringify(currentCartData, null, 2);
-    await this.updateCartData(updatedCartData);
+    await this.updateCartData(currentCartData);
     return currentCartData;
+  }
+
+  async removeItem(productId: string): Promise<void> {
+    if (!productId) throw new BadRequestException('productId cannot be empty.');
+
+    const currentCartData: CartItem[] = await this.getCurrentCartData();
+    const itemIndex = currentCartData.findIndex(
+      (item) => `${item.id}` === productId,
+    );
+
+    if (itemIndex === -1)
+      throw new NotFoundException('Item not found on cart.');
+
+    currentCartData.splice(itemIndex, 1);
+    await this.updateCartData(currentCartData);
   }
 
   async getCurrentCartData(): Promise<CartItem[]> {
@@ -55,7 +69,7 @@ export class CartService {
 
   async createEmptyRecord(): Promise<CartItem[]> {
     try {
-      await this.updateCartData('[]');
+      await this.updateCartData([]);
       return [];
     } catch (error) {
       console.error(error);
@@ -79,7 +93,8 @@ export class CartService {
     return JSON.parse(data);
   }
 
-  async updateCartData(updatedData: string): Promise<void> {
-    await fsPromises.writeFile(this.filePath, updatedData, 'utf-8');
+  async updateCartData(updatedData: CartItem[]): Promise<void> {
+    const convertedData = JSON.stringify(updatedData, null, 2);
+    await fsPromises.writeFile(this.filePath, convertedData, 'utf-8');
   }
 }
