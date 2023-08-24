@@ -50,7 +50,7 @@ export class CartService {
     return currentCartData;
   }
 
-  async removeItem(productId: string): Promise<void> {
+  async removeItem(productId: string): Promise<Cart> {
     if (!productId) throw new BadRequestException('productId cannot be empty.');
 
     const currentCartData: Cart = await this.getCurrentCartData();
@@ -66,6 +66,7 @@ export class CartService {
       parseFloat(currentCartData.cartItems[itemIndex].price);
     currentCartData.cartItems.splice(itemIndex, 1);
     await this.updateCartData(currentCartData);
+    return currentCartData;
   }
 
   async getCurrentCartData(): Promise<Cart> {

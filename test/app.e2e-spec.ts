@@ -35,7 +35,7 @@ describe('AppModule (e2e)', () => {
   it('/cart (DELETE)', () => {
     return request(app.getHttpServer())
       .delete('/cart/7596624904422')
-      .expect(204);
+      .expect(200);
   });
 });
 ``;

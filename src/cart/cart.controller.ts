@@ -25,8 +25,7 @@ export class CartController {
   }
 
   @Delete(':productId')
-  @HttpCode(204)
-  async removeItem(@Param('productId') productId: string): Promise<void> {
-    await this.cartService.removeItem(productId);
+  async removeItem(@Param('productId') productId: string): Promise<Cart> {
+    return await this.cartService.removeItem(productId);
   }
 }
