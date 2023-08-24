@@ -8,19 +8,19 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CartItem } from './interfaces/cart-item.interface';
+import { Cart } from './interfaces/cart.interface';
 
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  async getCart(): Promise<CartItem[]> {
+  async getCart(): Promise<Cart> {
     return this.cartService.getCart();
   }
 
   @Post()
-  async addItem(@Body('productId') productId: string): Promise<CartItem[]> {
+  async addItem(@Body('productId') productId: string): Promise<Cart> {
     return this.cartService.addItem(productId);
   }
 

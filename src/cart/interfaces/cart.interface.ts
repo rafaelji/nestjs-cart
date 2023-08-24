@@ -1,3 +1,7 @@
+export interface Cart {
+  cartItems: CartItem[];
+  total: number;
+}
 export interface CartItem {
   id: number;
   title: string;

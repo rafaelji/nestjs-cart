@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CartItem } from './interfaces/cart-item.interface';
+import { Cart } from './interfaces/cart.interface';
 import * as fsPromises from 'fs/promises';
 import * as path from 'path';
 import { ProductService } from '../product/product.service';
@@ -13,7 +13,7 @@ export class CartService {
   filePath = path.join(__dirname, 'cart.json');
 
   constructor(private productService: ProductService) {}
-  async getCart(): Promise<CartItem[]> {
+  async getCart(): Promise<Cart> {
     try {
       return this.getCurrentCartData();
     } catch (error) {
@@ -21,7 +21,7 @@ export class CartService {
     }
   }
 
-  async addItem(productId: string): Promise<CartItem[]> {
+  async addItem(productId: string): Promise<Cart> {
     if (!productId) throw new BadRequestException('productId cannot be empty.');
 
     const products = await this.productService.getAll();
@@ -31,15 +31,20 @@ export class CartService {
 
     if (!selectedProduct) throw new NotFoundException('productId not found.');
 
-    const currentCartData: CartItem[] = await this.getCurrentCartData();
+    const currentCartData: Cart = await this.getCurrentCartData();
 
-    currentCartData.push({
+    currentCartData.cartItems.push({
       id: selectedProduct.id,
       title: selectedProduct.title,
       price: selectedProduct.variants[0].price,
       option1: selectedProduct.variants[0].option1,
       option2: selectedProduct.variants[0].option2,
     });
+
+    currentCartData.total = currentCartData.cartItems.reduce(
+      (previous, current) => previous + parseFloat(current.price),
+      0,
+    );
 
     await this.updateCartData(currentCartData);
     return currentCartData;
@@ -48,29 +53,33 @@ export class CartService {
   async removeItem(productId: string): Promise<void> {
     if (!productId) throw new BadRequestException('productId cannot be empty.');
 
-    const currentCartData: CartItem[] = await this.getCurrentCartData();
-    const itemIndex = currentCartData.findIndex(
+    const currentCartData: Cart = await this.getCurrentCartData();
+    const itemIndex = currentCartData.cartItems.findIndex(
       (item) => `${item.id}` === productId,
     );
 
     if (itemIndex === -1)
       throw new NotFoundException('Item not found on cart.');
 
-    currentCartData.splice(itemIndex, 1);
+    currentCartData.total =
+      currentCartData.total -
+      parseFloat(currentCartData.cartItems[itemIndex].price);
+    currentCartData.cartItems.splice(itemIndex, 1);
     await this.updateCartData(currentCartData);
   }
 
-  async getCurrentCartData(): Promise<CartItem[]> {
+  async getCurrentCartData(): Promise<Cart> {
     if (await this.isCartDataAvailable()) {
       return this.getCartData();
     }
     return this.createEmptyRecord();
   }
 
-  async createEmptyRecord(): Promise<CartItem[]> {
+  async createEmptyRecord(): Promise<Cart> {
     try {
-      await this.updateCartData([]);
-      return [];
+      const emptyRecord: Cart = { cartItems: [], total: 0 };
+      await this.updateCartData(emptyRecord);
+      return emptyRecord;
     } catch (error) {
       console.error(error);
     }
@@ -88,12 +97,12 @@ export class CartService {
     }
   }
 
-  async getCartData(): Promise<CartItem[]> {
+  async getCartData(): Promise<Cart> {
     const data = await fsPromises.readFile(this.filePath, 'utf-8');
     return JSON.parse(data);
   }
 
-  async updateCartData(updatedData: CartItem[]): Promise<void> {
+  async updateCartData(updatedData: Cart): Promise<void> {
     const convertedData = JSON.stringify(updatedData, null, 2);
     await fsPromises.writeFile(this.filePath, convertedData, 'utf-8');
   }
