@@ -24,13 +24,13 @@ describe('CartController', () => {
 
     it('should add one item and return cart list', async () => {
       const result = await cartController.addItem('7596624904422');
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.cartItems.length).toBeGreaterThan(0);
     });
 
     it('should remove one item', async () => {
       await cartController.removeItem('7596624904422');
       const result = await cartController.getCart();
-      expect(result.length).toBe(0);
+      expect(result.cartItems.length).toBe(0);
     });
   });
 
